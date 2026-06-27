@@ -1,17 +1,34 @@
 (() => {
+  const themeStorageKey = "kickd-theme";
+  const themeLogo = document.querySelector(".theme-logo");
+  const themeToggle = document.querySelector(".theme-toggle");
+  const themeToggleText = document.querySelector(".theme-toggle__text");
+  const themeColorMeta = document.querySelector("#theme-color-meta");
   const section = document.querySelector(".personas-section");
   const personaItems = Array.from(document.querySelectorAll(".persona"));
+  const personaStageArt = document.querySelector(".persona-stage-art");
   const runSection = document.querySelector(".run-section");
   const featureGrid = runSection?.querySelector(".feature-grid") ?? null;
 
   const mobileQuery = window.matchMedia("(max-width: 760px)");
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const revealTargets = [
+    ...document.querySelectorAll(
+      ".hero__copy h1, .hero__copy p, .download-row, .hero__visual, .score-section h2, .bento-card, .run-section h2, .feature-card, .personas-scene > h2, .persona-list, .persona-phone-stage, .footer-nav-shell, .footer-mobile-card",
+    ),
+  ];
 
   const opacityStates = [
     [1, 0.42, 0.18, 0.07],
     [0.26, 1, 0.42, 0.18],
     [0.12, 0.28, 1, 0.42],
     [0.06, 0.14, 0.3, 1],
+  ];
+  const personaStageSources = [
+    "/assets/images/persona-step-1.svg",
+    "/assets/images/persona-step-2.svg",
+    "/assets/images/persona-step-3.svg",
+    "/assets/images/persona-step-4.svg",
   ];
 
   const animationState = {
@@ -24,6 +41,42 @@
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+  const applyTheme = (theme) => {
+    const resolvedTheme = theme === "dark" ? "dark" : "light";
+    document.body.dataset.theme = resolvedTheme;
+    localStorage.setItem(themeStorageKey, resolvedTheme);
+
+    const isDark = resolvedTheme === "dark";
+    if (themeLogo) {
+      themeLogo.setAttribute("aria-pressed", String(isDark));
+      themeLogo.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
+    }
+
+    if (themeToggle) {
+      themeToggle.setAttribute("aria-pressed", String(isDark));
+      themeToggle.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
+    }
+
+    if (themeToggleText) {
+      themeToggleText.textContent = isDark ? "Dark mode" : "Light mode";
+    }
+
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute("content", isDark ? "#292C32" : "#ffffff");
+    }
+  };
+
+  const toggleTheme = () => {
+    const nextTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(nextTheme);
+  };
+
+  const initialTheme = localStorage.getItem(themeStorageKey) ?? "light";
+  applyTheme(initialTheme);
+
+  themeLogo?.addEventListener("click", toggleTheme);
+  themeToggle?.addEventListener("click", toggleTheme);
+
   const applyStage = (activeIndex) => {
     const stageIndex = Math.max(0, Math.min(opacityStates.length - 1, activeIndex));
     const opacities = opacityStates[stageIndex];
@@ -35,6 +88,13 @@
       item.setAttribute("aria-current", isActive ? "true" : "false");
       item.style.setProperty("--persona-opacity", String(opacities[index]));
     });
+
+    if (personaStageArt) {
+      const nextSource = personaStageSources[stageIndex] ?? personaStageSources[0];
+      if (personaStageArt.getAttribute("src") !== nextSource) {
+        personaStageArt.setAttribute("src", nextSource);
+      }
+    }
 
     animationState.activeIndex = stageIndex;
   };
@@ -97,11 +157,7 @@
   };
 
   const requestStageUpdate = () => {
-    if (animationState.frameId !== null) {
-      return;
-    }
-
-    animationState.frameId = window.requestAnimationFrame(updateStage);
+    updateStage();
   };
 
   const requestRunSectionUpdate = () => {
@@ -110,6 +166,41 @@
     }
 
     runScrollState.frameId = window.requestAnimationFrame(updateRunSectionScroll);
+  };
+
+  const setupRevealAnimations = () => {
+    if (!revealTargets.length) {
+      return;
+    }
+
+    revealTargets.forEach((element, index) => {
+      element.classList.add("reveal-on-scroll");
+      element.style.setProperty("--reveal-delay", `${Math.min(index * 45, 220)}ms`);
+    });
+
+    if (reducedMotionQuery.matches || !("IntersectionObserver" in window)) {
+      revealTargets.forEach((element) => element.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.18,
+        rootMargin: "0px 0px -8% 0px",
+      },
+    );
+
+    revealTargets.forEach((element) => observer.observe(element));
   };
 
   if (section && personaItems.length === 4) {
@@ -129,4 +220,6 @@
     mobileQuery.addEventListener("change", syncRunSectionHeight);
     mobileQuery.addEventListener("change", requestRunSectionUpdate);
   }
+
+  setupRevealAnimations();
 })();
