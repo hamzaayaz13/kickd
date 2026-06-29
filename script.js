@@ -14,7 +14,7 @@
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const revealTargets = [
     ...document.querySelectorAll(
-      ".hero__copy h1, .hero__copy p, .download-row, .hero__visual, .score-section h2, .bento-card, .run-section h2, .feature-card, .personas-scene > h2, .persona-list, .persona-phone-stage, .footer-nav-shell, .footer-mobile-card",
+      ".hero__copy h1, .hero__copy p, .download-row, .hero__visual, .intro-kicker, .intro-section h2, .intro-lead, .intro-step, .score-section h2, .bento-card, .run-section h2, .feature-card, .personas-scene > h2, .persona-list, .persona-phone-stage, .footer-nav-shell, .footer-mobile-card",
     ),
   ];
 

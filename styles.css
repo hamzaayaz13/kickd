@@ -560,6 +560,101 @@ body[data-theme="dark"] .theme-toggle__thumb {
   height: 40px;
 }
 
+.intro-section {
+  padding: 96px 0 8px;
+  background: var(--page-bg);
+}
+
+.intro-section__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.intro-kicker {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #292c32;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.intro-section h2 {
+  margin-top: 22px;
+  max-width: 14ch;
+  color: var(--text-heading);
+  font-size: 48px;
+  line-height: 1.15;
+  font-weight: 900;
+}
+
+.intro-section h2 span {
+  color: #ffad5c;
+}
+
+.intro-lead {
+  margin-top: 22px;
+  max-width: 620px;
+  color: var(--text-secondary);
+  font-size: 20px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.intro-steps {
+  margin: 56px 0 0;
+  padding: 0;
+  list-style: none;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  text-align: left;
+  counter-reset: intro-step;
+}
+
+.intro-step {
+  position: relative;
+  padding: 28px 24px;
+  border-radius: 20px;
+  background: var(--surface-card);
+}
+
+.intro-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #292c32;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.intro-step h3 {
+  margin-top: 18px;
+  color: var(--text-heading);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.intro-step p {
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
 .score-section {
   height: 993px;
   padding: 80px 0;
@@ -1369,6 +1464,7 @@ body[data-theme="dark"] .bento-card--capture,
 body[data-theme="dark"] .bento-card--banter,
 body[data-theme="dark"] .bento-card--podium,
 body[data-theme="dark"] .feature-card,
+body[data-theme="dark"] .intro-step,
 body[data-theme="dark"] .result-ticket {
   box-shadow: 0 0 0 1px rgb(248 193 91 / 8%);
 }
@@ -1759,6 +1855,31 @@ body[data-theme="dark"] .footer-mobile-contact {
 
   .score-section {
     padding-block: 56px;
+  }
+
+  .intro-section {
+    padding: 56px 0 4px;
+  }
+
+  .intro-section h2 {
+    margin-top: 18px;
+    font-size: 32px;
+    line-height: 1.12;
+  }
+
+  .intro-lead {
+    margin-top: 16px;
+    font-size: 17px;
+  }
+
+  .intro-steps {
+    margin-top: 36px;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .intro-step {
+    padding: 22px 20px;
   }
 
   .personas-section {
