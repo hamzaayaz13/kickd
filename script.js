@@ -5,8 +5,14 @@
   const themeToggleText = document.querySelector(".theme-toggle__text");
   const themeColorMeta = document.querySelector("#theme-color-meta");
   const section = document.querySelector(".personas-section");
+  const personaScene = document.querySelector(".personas-scene");
+  const personaTitle = document.querySelector(".personas-scene > h2");
   const personaItems = Array.from(document.querySelectorAll(".persona"));
+  const personaList = document.querySelector(".persona-list");
+  const personaPhoneStage = document.querySelector(".persona-phone-stage");
   const personaStageArt = document.querySelector(".persona-stage-art");
+  const personaTicker = document.querySelector(".persona-ticker");
+  const personaFinale = document.querySelector(".persona-finale");
   const runSection = document.querySelector(".run-section");
   const featureGrid = runSection?.querySelector(".feature-grid") ?? null;
 
@@ -14,7 +20,7 @@
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const revealTargets = [
     ...document.querySelectorAll(
-      ".hero__copy h1, .hero__copy p, .download-row, .hero__visual, .score-section h2, .bento-card, .run-section h2, .feature-card, .personas-scene > h2, .persona-list, .persona-phone-stage, .footer-nav-shell, .footer-mobile-card",
+      ".hero__copy h1, .hero__copy p, .download-row, .hero__visual, .score-section h2, .bento-card, .run-section h2, .feature-card, .footer-nav-shell, .footer-mobile-card",
     ),
   ];
 
@@ -32,11 +38,18 @@
   ];
 
   const animationState = {
-    activeIndex: 0,
+    activeIndex: -1,
     frameId: null,
+    progress: 0,
   };
   const runScrollState = {
     frameId: null,
+  };
+  const personaMetrics = {
+    shiftX: 0,
+    shiftY: 0,
+    finalScale: 1,
+    finaleTop: 0,
   };
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -99,24 +112,134 @@
     animationState.activeIndex = stageIndex;
   };
 
-  const calculateStage = () => {
+  const calculatePersonaProgress = () => {
     if (!section) {
       return 0;
     }
 
     const sectionTop = section.getBoundingClientRect().top;
     const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
-    const progress = clamp(-sectionTop / scrollableDistance, 0, 0.9999);
-    return Math.min(opacityStates.length - 1, Math.floor(progress * opacityStates.length));
+    return clamp(-sectionTop / scrollableDistance, 0, 1);
+  };
+
+  const setPersonaVars = ({
+    titleOpacity = 1,
+    listOpacity = 1,
+    panelOpacity = 1,
+    shiftX = 0,
+    shiftY = 0,
+    scale = 1,
+    tickerOpacity = 0,
+    finaleOpacity = 0,
+    finaleShift = 34,
+    finaleTop = personaMetrics.finaleTop || 0,
+  }) => {
+    if (!section) {
+      return;
+    }
+
+    section.style.setProperty("--persona-title-opacity", String(titleOpacity));
+    section.style.setProperty("--persona-list-opacity", String(listOpacity));
+    section.style.setProperty("--persona-panel-opacity", String(panelOpacity));
+    section.style.setProperty("--persona-phone-shift-x", `${shiftX}px`);
+    section.style.setProperty("--persona-phone-shift-y", `${shiftY}px`);
+    section.style.setProperty("--persona-phone-scale", String(scale));
+    section.style.setProperty("--persona-ticker-opacity", String(tickerOpacity));
+    section.style.setProperty("--persona-finale-opacity", String(finaleOpacity));
+    section.style.setProperty("--persona-finale-shift", `${finaleShift}px`);
+    section.style.setProperty("--persona-finale-top", `${finaleTop}px`);
+
+    if (personaPhoneStage) {
+      personaPhoneStage.style.transform = `translate3d(${shiftX}px, ${shiftY}px, 0) scale(${scale})`;
+    }
+
+    if (personaTicker) {
+      personaTicker.style.opacity = String(tickerOpacity);
+    }
+
+    if (personaFinale) {
+      personaFinale.style.opacity = String(finaleOpacity);
+      personaFinale.style.top = `${finaleTop}px`;
+      personaFinale.style.transform = `translate3d(-50%, ${finaleShift}px, 0)`;
+    }
+  };
+
+  const easeOutCubic = (value) => 1 - (1 - value) ** 3;
+  const easeInOutCubic = (value) =>
+    value < 0.5 ? 4 * value ** 3 : 1 - (-2 * value + 2) ** 3 / 2;
+
+  const measurePersonaTargets = () => {
+    if (!section || !personaScene || !personaPhoneStage || !personaStageArt) {
+      return;
+    }
+
+    const savedProgress = animationState.progress;
+    setPersonaVars({});
+
+    const sceneRect = personaScene.getBoundingClientRect();
+    const artRect = personaStageArt.getBoundingClientRect();
+    const artCenterX = artRect.left - sceneRect.left + artRect.width / 2;
+    const artCenterY = artRect.top - sceneRect.top + artRect.height / 2;
+    const targetCenterX = window.innerWidth / 2;
+    const targetCenterY = mobileQuery.matches ? window.innerHeight * 0.31 : window.innerHeight * 0.3;
+    const targetRelativeX = targetCenterX - sceneRect.left;
+
+    personaMetrics.shiftX = targetRelativeX - artCenterX;
+    personaMetrics.shiftY = targetCenterY - artCenterY;
+    personaMetrics.finalScale = mobileQuery.matches ? 0.62 : window.innerWidth <= 1100 ? 0.52 : 0.47;
+    personaMetrics.finaleTop = targetCenterY + (artRect.height * personaMetrics.finalScale) / 2 + 80;
+
+    animationState.progress = savedProgress;
+    setPersonaVars({});
+  };
+
+  const updatePersonaSequence = () => {
+    const progress = calculatePersonaProgress();
+    const storyProgress = clamp(progress / 0.62, 0, 0.9999);
+    const stageIndex = Math.min(opacityStates.length - 1, Math.floor(storyProgress * opacityStates.length));
+
+    if (stageIndex !== animationState.activeIndex || reducedMotionQuery.matches) {
+      applyStage(stageIndex);
+    }
+
+    const exitProgress = easeInOutCubic(clamp((progress - 0.62) / 0.18, 0, 1));
+    const finaleProgress = easeOutCubic(clamp((progress - 0.81) / 0.09, 0, 1));
+    const tickerProgress = easeOutCubic(clamp((progress - 0.88) / 0.08, 0, 1));
+
+    setPersonaVars({
+      titleOpacity: 1 - clamp((progress - 0.62) / 0.1, 0, 1),
+      listOpacity: 1 - exitProgress,
+      panelOpacity: 1 - exitProgress,
+      shiftX: personaMetrics.shiftX * exitProgress,
+      shiftY: personaMetrics.shiftY * exitProgress,
+      scale: 1 - (1 - personaMetrics.finalScale) * exitProgress,
+      tickerOpacity: tickerProgress,
+      finaleOpacity: finaleProgress,
+      finaleShift: 44 - 44 * finaleProgress,
+      finaleTop: personaMetrics.finaleTop,
+    });
+
+    if (personaTicker) {
+      personaTicker.setAttribute("aria-hidden", tickerProgress < 0.05 ? "true" : "false");
+    }
+
+    if (personaFinale) {
+      personaFinale.setAttribute("aria-hidden", finaleProgress < 0.1 ? "true" : "false");
+    }
+
+    if (personaTitle) {
+      personaTitle.setAttribute("aria-hidden", progress > 0.72 ? "true" : "false");
+    }
+
+    if (personaList) {
+      personaList.setAttribute("aria-hidden", progress > 0.72 ? "true" : "false");
+    }
+
+    animationState.progress = progress;
   };
 
   const updateStage = () => {
-    const nextIndex = calculateStage();
-
-    if (nextIndex !== animationState.activeIndex || reducedMotionQuery.matches) {
-      applyStage(nextIndex);
-    }
-
+    updatePersonaSequence();
     animationState.frameId = null;
   };
 
@@ -204,10 +327,18 @@
   };
 
   if (section && personaItems.length === 4) {
-    applyStage(calculateStage());
+    measurePersonaTargets();
+    updatePersonaSequence();
     requestStageUpdate();
     window.addEventListener("scroll", requestStageUpdate, { passive: true });
-    window.addEventListener("resize", requestStageUpdate);
+    window.addEventListener("resize", () => {
+      measurePersonaTargets();
+      requestStageUpdate();
+    });
+    mobileQuery.addEventListener("change", () => {
+      measurePersonaTargets();
+      requestStageUpdate();
+    });
     reducedMotionQuery.addEventListener("change", requestStageUpdate);
   }
 
