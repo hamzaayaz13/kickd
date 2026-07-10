@@ -249,6 +249,9 @@
     }
 
     if (!mobileQuery.matches || reducedMotionQuery.matches || !window.gsap || !window.ScrollTrigger) {
+      if (mobileQuery.matches) {
+        updatePersonaSectionScroll();
+      }
       return;
     }
 
@@ -263,6 +266,8 @@
       onUpdate: (self) => applyPersonaProgress(self.progress),
       onRefresh: (self) => applyPersonaProgress(self.progress),
     });
+
+    applyPersonaProgress(personaStoryTrigger.progress || 0);
   };
 
   const stopPersonaTicker = () => {
@@ -275,7 +280,7 @@
   const startPersonaTicker = () => {
     stopPersonaTicker();
 
-    if (!mobileQuery.matches || reducedMotionQuery.matches) {
+    if (!mobileQuery.matches || reducedMotionQuery.matches || (window.gsap && window.ScrollTrigger)) {
       return;
     }
 
@@ -285,6 +290,9 @@
 
   const requestStageUpdate = () => {
     if (mobileQuery.matches) {
+      if (personaStoryTrigger) {
+        return;
+      }
       updatePersonaSectionScroll();
       return;
     }
