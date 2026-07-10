@@ -5,28 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Kickd keeps the score, settles the arguments, and gives every football rivalry a leaderboard."
+      content="Kickd is the leaderboard for football groups. Keep track of every match, build rivalries, and prove who's best."
     />
     <meta name="theme-color" content="#ffffff" id="theme-color-meta" />
-    <title>Kickd — Every Rivalry Needs a Scoreboard</title>
+    <title>Kickd — The leaderboard for football groups</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=54" />
-    <script src="/script.js?v=24" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=95" />
+    <script src="/assets/vendor/gsap.min.js" defer></script>
+    <script src="/assets/vendor/ScrollTrigger.min.js" defer></script>
+    <script src="/script.js?v=57" defer></script>
   </head>
   <body>
     <main class="site-shell">
       <section class="hero" aria-labelledby="hero-title">
         <nav class="nav wrap" aria-label="Primary navigation">
           <div class="nav__brand-stack">
-            <button class="brand brand--nav theme-logo" type="button" aria-label="Switch between light and dark mode" aria-pressed="false">
-              kickd
-            </button>
-            <button class="theme-toggle" type="button" aria-label="Switch between light and dark mode" aria-pressed="false">
-              <span class="theme-toggle__track" aria-hidden="true">
-                <span class="theme-toggle__thumb"></span>
-              </span>
-              <span class="theme-toggle__text">Light mode</span>
-            </button>
+            <a class="brand brand--nav" href="#top">kickd</a>
           </div>
           <div class="nav__links">
             <a href="#run">Leagues</a>
@@ -45,28 +39,16 @@
 
           <div class="hero__copy">
             <h1 id="hero-title">
-              Every Rivalry Needs<br />
-              A <span>Scoreboard</span>
+              The leaderboard for<br />
+              <span>football groups.</span>
             </h1>
             <p>
-              Keep score, settle arguments, and build a leaderboard your<br />
-              friends can’t talk their way out of.
+              Keep track of every match you play with your friends. Record results, build rivalries,
+              and always know who's really number one.
             </p>
             <div class="download-row download-row--desktop" id="download">
-              <a class="download-button" href="#" aria-label="Download for iOS">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M17.1 12.5c0-2.7 2.2-4 2.3-4.1-1.3-1.8-3.2-2.1-3.9-2.1-1.7-.2-3.2 1-4.1 1-.9 0-2.3-1-3.7-.9-1.9 0-3.6 1.1-4.6 2.8-2 3.4-.5 8.5 1.4 11.3 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-1 3.7-1s2.2 1 3.7 1c1.5 0 2.5-1.4 3.5-2.8 1.1-1.6 1.5-3.2 1.6-3.3-.1 0-3.5-1.3-3.5-5.7ZM14.4 4.6c.8-1 1.4-2.4 1.2-3.8-1.2.1-2.7.8-3.6 1.8-.8.9-1.5 2.3-1.3 3.7 1.4.1 2.8-.7 3.7-1.7Z"/>
-                </svg>
-                Download for iOS
-              </a>
-              <a class="download-button" href="#" aria-label="Download for Android">
-                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fill="#34a853" d="M3 2.5v19l10.8-9.5z"/>
-                  <path fill="#fbbc04" d="m13.8 12 3.4-3-4.3-2.5L3 2.5z"/>
-                  <path fill="#4285f4" d="m13.8 12 3.4 3-4.3 2.5L3 21.5z"/>
-                  <path fill="#ea4335" d="m17.2 9 3.5 2c.9.5.9 1.4 0 2l-3.5 2-3.4-3z"/>
-                </svg>
-                Download for Android
+              <a class="download-button download-button--single" href="#" aria-label="Download the app">
+                Download the app
               </a>
             </div>
             <div class="download-row download-row--mobile">
@@ -78,38 +60,20 @@
         </div>
       </section>
 
-      <section class="intro-section" id="about" aria-labelledby="intro-title">
-        <div class="wrap intro-section__inner">
-          <span class="intro-kicker">What is Kickd?</span>
-          <h2 id="intro-title">
-            The scoreboard for your <span>football video&nbsp;game</span> rivalries.
-          </h2>
-          <p class="intro-lead">
-            Kickd is the app that keeps score when you and your mates play FIFA, EA&nbsp;FC and
-            eFootball. Log every result, build a leaderboard that never lies, and turn each
-            “I swear I beat you” into a stat you can actually prove.
-          </p>
-          <ol class="intro-steps">
-            <li class="intro-step">
-              <span class="intro-step__num">1</span>
-              <h3>Play your match</h3>
-              <p>Settle it head-to-head — any football game, any console.</p>
-            </li>
-            <li class="intro-step">
-              <span class="intro-step__num">2</span>
-              <h3>Snap the final score</h3>
-              <p>Take a photo of the result and Kickd logs it for you.</p>
-            </li>
-            <li class="intro-step">
-              <span class="intro-step__num">3</span>
-              <h3>Climb the leaderboard</h3>
-              <p>Watch the table update and let the banter begin.</p>
-            </li>
-          </ol>
+      <section class="section-reveal intro-section" id="about" aria-labelledby="intro-title">
+        <div class="section-reveal__sticky">
+          <div class="section-reveal__panel section-reveal__panel--top" aria-hidden="true"></div>
+          <div class="section-reveal__panel section-reveal__panel--bottom" aria-hidden="true"></div>
+
+          <div class="section-reveal__intro">
+            <div class="section-reveal__intro-inner wrap">
+              <h2 class="impact-line" id="intro-title">
+                Track every match. Build your leaderboard. End the debate.
+              </h2>
+            </div>
+          </div>
         </div>
       </section>
-
-      <div class="page-gap page-gap--large"></div>
 
       <div class="score-run-group">
         <section class="score-section" id="score" aria-labelledby="score-title">
@@ -119,9 +83,6 @@
               <article class="bento-card bento-card--podium">
                 <h3>The score speaks for itself.</h3>
                 <p>Keep a record everyone can agree on</p>
-                <div class="confetti" aria-hidden="true">
-                  <img src="/assets/images/podium-confetti.gif" alt="" />
-                </div>
                 <img
                   class="podium-reference-art"
                   src="/assets/images/score-podium-reference.png"
@@ -135,7 +96,7 @@
                 <div class="capture-phone-wrap">
                   <img
                     class="capture-phone-art"
-                    src="/assets/images/capture-phone-reference.png"
+                    src="/assets/images/capture-phone-reference.svg"
                     alt="Kickd capture score app screen"
                   />
                 </div>
@@ -186,8 +147,8 @@
                   </div>
                 </div>
                 <div class="feature-card__copy">
-                  <h3>Get the squad together.</h3>
-                  <p>Create a league and invite the people you play with every week.</p>
+                  <h3>Create your league.</h3>
+                  <p>Invite the people you play with every week and keep everyone in one place.</p>
                 </div>
               </article>
 
@@ -200,8 +161,8 @@
                   <small>schaudhri　　　　　　　　 Hamza</small>
                 </div>
                 <div class="feature-card__copy">
-                  <h3>Keep the score.</h3>
-                  <p>Snap the final result and let Kickd update the table. You can focus on who’s the number 1.</p>
+                  <h3>Record every result.</h3>
+                  <p>Snap the final score after every match and let Kickd update the table automatically.</p>
                 </div>
               </article>
 
@@ -212,12 +173,11 @@
                   <div class="field-chat__message field-chat__message--two">MY CONTROLLER WAS<br />BROKEN</div>
                 </div>
                 <div class="feature-card__copy">
-                  <h3>Keep the banter going.</h3>
-                  <p>Celebrate wins, settle debates, and remind your friends who lost.</p>
+                  <h3>Watch the rivalry grow.</h3>
+                  <p>Every match adds to your history, making every win, loss, and comeback count.</p>
                 </div>
-              </div>
-            </article>
-          </div>
+              </article>
+            </div>
           </div>
         </section>
       </div>
@@ -228,20 +188,32 @@
           <div class="personas-layout">
           <div class="persona-list" aria-label="Football group personalities">
             <button class="persona is-active" type="button" aria-selected="true" data-persona="scorer">
-              <strong>The top scorer.</strong>
-              <span>Will mention it every chance he gets.</span>
+              <div class="persona__copy">
+                <strong>The top scorer.</strong>
+                <span>Will mention it every chance he gets.</span>
+              </div>
+              <img class="persona__art" src="/assets/images/persona-step-1.svg" alt="" aria-hidden="true" />
             </button>
             <button class="persona" type="button" aria-selected="false" data-persona="excuse">
-              <strong>The excuse machine.</strong>
-              <span>Apparently the controller was broken.</span>
+              <div class="persona__copy">
+                <strong>The excuse machine.</strong>
+                <span>Apparently the controller was broken.</span>
+              </div>
+              <img class="persona__art" src="/assets/images/persona-step-2.svg" alt="" aria-hidden="true" />
             </button>
             <button class="persona" type="button" aria-selected="false" data-persona="checker">
-              <strong>The stat checker</strong>
-              <span>Apparently the controller was broken.</span>
+              <div class="persona__copy">
+                <strong>The stat checker</strong>
+                <span>Always ready to pull up receipts.</span>
+              </div>
+              <img class="persona__art" src="/assets/images/persona-step-3.svg" alt="" aria-hidden="true" />
             </button>
             <button class="persona" type="button" aria-selected="false" data-persona="assassin">
-              <strong>The silent assassin.</strong>
-              <span>Apparently the controller was broken.</span>
+              <div class="persona__copy">
+                <strong>The silent assassin.</strong>
+                <span>Says nothing, then quietly wins again.</span>
+              </div>
+              <img class="persona__art" src="/assets/images/persona-step-4.svg" alt="" aria-hidden="true" />
             </button>
           </div>
 
@@ -270,6 +242,7 @@
             <a class="footer-hotspot footer-hotspot--twitter" href="https://twitter.com" target="_blank" rel="noreferrer">Twitter</a>
             <a class="footer-hotspot footer-hotspot--linkedin" href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
             <a class="footer-hotspot footer-hotspot--contact" href="mailto:hello@kickd.app">Contact us</a>
+            <a class="footer-hotspot footer-hotspot--download" href="#download">Download the app</a>
             <a class="footer-hotspot footer-hotspot--support" href="mailto:support@kickd.app">Help &amp; Support</a>
           </div>
         </div>
@@ -286,7 +259,7 @@
                   <a href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
                 </div>
               </div>
-              <a class="footer-mobile-contact" href="mailto:hello@kickd.app">Contact us</a>
+              <a class="footer-mobile-download" href="#download">Download the app</a>
             </div>
             <div class="footer-mobile-bottom">
               <span>© 2026 <i>• •</i></span>

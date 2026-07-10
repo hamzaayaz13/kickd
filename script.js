@@ -1,20 +1,26 @@
 (() => {
-  const themeStorageKey = "kickd-theme";
-  const themeLogo = document.querySelector(".theme-logo");
-  const themeToggle = document.querySelector(".theme-toggle");
-  const themeToggleText = document.querySelector(".theme-toggle__text");
   const themeColorMeta = document.querySelector("#theme-color-meta");
+  const introSection = document.querySelector(".section-reveal");
+  const impactLine = document.querySelector(".impact-line");
+  const revealIntro = introSection?.querySelector(".section-reveal__intro") ?? null;
+  const revealPanelTop = introSection?.querySelector(".section-reveal__panel--top") ?? null;
+  const revealPanelBottom = introSection?.querySelector(".section-reveal__panel--bottom") ?? null;
+  const scoreRunGroup = document.querySelector(".score-run-group");
   const section = document.querySelector(".personas-section");
   const personaItems = Array.from(document.querySelectorAll(".persona"));
+  const personaList = section?.querySelector(".persona-list") ?? null;
   const personaStageArt = document.querySelector(".persona-stage-art");
   const runSection = document.querySelector(".run-section");
+  const runWrap = runSection?.querySelector(".wrap") ?? null;
   const featureGrid = runSection?.querySelector(".feature-grid") ?? null;
+  const runCards = featureGrid ? Array.from(featureGrid.querySelectorAll(".feature-card")) : [];
 
   const mobileQuery = window.matchMedia("(max-width: 760px)");
+  const runStoryQuery = window.matchMedia("(min-width: 320px) and (max-width: 480px)");
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const revealTargets = [
     ...document.querySelectorAll(
-      ".hero__copy h1, .hero__copy p, .download-row, .hero__visual, .intro-kicker, .intro-section h2, .intro-lead, .intro-step, .score-section h2, .bento-card, .run-section h2, .feature-card, .personas-scene > h2, .persona-list, .persona-phone-stage, .footer-nav-shell, .footer-mobile-card",
+      ".hero__copy h1, .hero__copy p, .download-row, .hero__visual, .impact-line, .score-section h2, .bento-card, .run-section h2, .feature-card, .personas-scene > h2, .persona-list, .persona-phone-stage, .footer-nav-shell, .footer-mobile-card",
     ),
   ];
 
@@ -35,47 +41,106 @@
     activeIndex: 0,
     frameId: null,
   };
-  const runScrollState = {
+  const personaScrollState = {
+    frameId: null,
+  };
+  let personaStoryTrigger = null;
+  let personaTickerId = null;
+  let sectionRevealTrigger = null;
+  const runStoryState = {
     frameId: null,
   };
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-  const applyTheme = (theme) => {
-    const resolvedTheme = theme === "dark" ? "dark" : "light";
-    document.body.dataset.theme = resolvedTheme;
-    localStorage.setItem(themeStorageKey, resolvedTheme);
-
-    const isDark = resolvedTheme === "dark";
-    if (themeLogo) {
-      themeLogo.setAttribute("aria-pressed", String(isDark));
-      themeLogo.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
-    }
-
-    if (themeToggle) {
-      themeToggle.setAttribute("aria-pressed", String(isDark));
-      themeToggle.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
-    }
-
-    if (themeToggleText) {
-      themeToggleText.textContent = isDark ? "Dark mode" : "Light mode";
+  const setupSectionReveal = () => {
+    if (sectionRevealTrigger) {
+      sectionRevealTrigger.kill();
+      sectionRevealTrigger = null;
     }
 
     if (themeColorMeta) {
-      themeColorMeta.setAttribute("content", isDark ? "#292C32" : "#ffffff");
+      themeColorMeta.setAttribute("content", "#ffffff");
     }
+
+    if (!introSection || !revealIntro || !revealPanelTop || !revealPanelBottom || !scoreRunGroup) {
+      return;
+    }
+
+    if (reducedMotionQuery.matches || !window.gsap || !window.ScrollTrigger) {
+      scoreRunGroup.style.removeProperty("transform");
+      scoreRunGroup.style.removeProperty("opacity");
+      return;
+    }
+
+    const gsap = window.gsap;
+    const ScrollTrigger = window.ScrollTrigger;
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.set(scoreRunGroup, { y: "24vh", opacity: 0 });
+    gsap.set(revealIntro, { opacity: 1, y: "0%" });
+    gsap.set(revealPanelTop, { scaleY: 0 });
+    gsap.set(revealPanelBottom, { scaleY: 0 });
+
+    const timeline = gsap.timeline({
+      scrollTrigger: {
+        id: "kickd-section-reveal",
+        trigger: introSection,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    timeline.to(
+      revealIntro,
+      {
+        opacity: 0,
+        y: "-6%",
+        duration: 0.2,
+        ease: "power1.in",
+      },
+      0.22,
+    );
+
+    timeline.to(
+      revealPanelTop,
+      {
+        scaleY: 1,
+        duration: 0.42,
+        ease: "power2.inOut",
+      },
+      0.26,
+    );
+
+    timeline.to(
+      revealPanelBottom,
+      {
+        scaleY: 1,
+        duration: 0.42,
+        ease: "power2.inOut",
+      },
+      0.26,
+    );
+
+    timeline.to(
+      scoreRunGroup,
+      {
+        y: "0vh",
+        opacity: 1,
+        duration: 0.36,
+        ease: "power2.out",
+      },
+      0.6,
+    );
+
+    sectionRevealTrigger = timeline.scrollTrigger;
   };
 
-  const toggleTheme = () => {
-    const nextTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
-    applyTheme(nextTheme);
-  };
-
-  const initialTheme = localStorage.getItem(themeStorageKey) ?? "light";
-  applyTheme(initialTheme);
-
-  themeLogo?.addEventListener("click", toggleTheme);
-  themeToggle?.addEventListener("click", toggleTheme);
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute("content", "#ffffff");
+  }
 
   const applyStage = (activeIndex) => {
     const stageIndex = Math.max(0, Math.min(opacityStates.length - 1, activeIndex));
@@ -120,52 +185,252 @@
     animationState.frameId = null;
   };
 
-  const syncRunSectionHeight = () => {
-    if (!runSection || !featureGrid) {
+  const syncPersonaSectionHeight = () => {
+    if (!section || !personaItems.length || !personaList) {
       return;
     }
 
     if (!mobileQuery.matches) {
-      runSection.style.removeProperty("--run-mobile-track-height");
-      featureGrid.scrollLeft = 0;
+      section.style.removeProperty("--persona-mobile-track-height");
+      personaList.scrollLeft = 0;
       return;
     }
 
-    const horizontalDistance = Math.max(0, featureGrid.scrollWidth - featureGrid.clientWidth);
+    const horizontalDistance = Math.max(0, personaList.scrollWidth - personaList.clientWidth);
     const sectionHeight = Math.max(window.innerHeight, window.innerHeight + horizontalDistance);
-    runSection.style.setProperty("--run-mobile-track-height", `${sectionHeight}px`);
+    section.style.setProperty("--persona-mobile-track-height", `${sectionHeight}px`);
+    window.ScrollTrigger?.refresh();
   };
 
-  const updateRunSectionScroll = () => {
-    if (!runSection || !featureGrid) {
+  const applyPersonaProgress = (progress) => {
+    if (!personaItems.length || !personaList) {
+      return;
+    }
+
+    const normalizedProgress = clamp(progress, 0, 1);
+    const maxScrollLeft = Math.max(0, personaList.scrollWidth - personaList.clientWidth);
+    const activeIndex = Math.min(
+      personaItems.length - 1,
+      Math.floor(clamp(normalizedProgress, 0, 0.9999) * personaItems.length),
+    );
+    const snappedScrollLeft =
+      personaItems.length > 1 ? (maxScrollLeft / (personaItems.length - 1)) * activeIndex : 0;
+
+    personaList.scrollLeft = snappedScrollLeft;
+    applyStage(activeIndex);
+  };
+
+  const updatePersonaSectionScroll = () => {
+    if (!section || !personaItems.length || !personaList) {
       return;
     }
 
     if (!mobileQuery.matches) {
-      runScrollState.frameId = null;
-      featureGrid.scrollLeft = 0;
+      personaScrollState.frameId = null;
       return;
     }
 
-    const maxScrollLeft = Math.max(0, featureGrid.scrollWidth - featureGrid.clientWidth);
-    const scrollableDistance = Math.max(1, runSection.offsetHeight - window.innerHeight);
-    const sectionTop = runSection.getBoundingClientRect().top;
+    const scrollableDistance = Math.max(1, section.offsetHeight - window.innerHeight);
+    const sectionTop = section.getBoundingClientRect().top;
     const progress = clamp(-sectionTop / scrollableDistance, 0, 1);
 
-    featureGrid.scrollLeft = progress * maxScrollLeft;
-    runScrollState.frameId = null;
+    applyPersonaProgress(progress);
+    personaScrollState.frameId = null;
+  };
+
+  const setupPersonaStory = () => {
+    if (!section || !personaItems.length || !personaList) {
+      return;
+    }
+
+    if (personaStoryTrigger) {
+      personaStoryTrigger.kill();
+      personaStoryTrigger = null;
+    }
+
+    if (!mobileQuery.matches || reducedMotionQuery.matches || !window.gsap || !window.ScrollTrigger) {
+      return;
+    }
+
+    window.gsap.registerPlugin(window.ScrollTrigger);
+
+    personaStoryTrigger = window.ScrollTrigger.create({
+      id: "kickd-persona-story",
+      trigger: section,
+      start: "top top",
+      end: "bottom bottom",
+      invalidateOnRefresh: true,
+      onUpdate: (self) => applyPersonaProgress(self.progress),
+      onRefresh: (self) => applyPersonaProgress(self.progress),
+    });
+  };
+
+  const stopPersonaTicker = () => {
+    if (personaTickerId !== null) {
+      window.clearInterval(personaTickerId);
+      personaTickerId = null;
+    }
+  };
+
+  const startPersonaTicker = () => {
+    stopPersonaTicker();
+
+    if (!mobileQuery.matches || reducedMotionQuery.matches) {
+      return;
+    }
+
+    updatePersonaSectionScroll();
+    personaTickerId = window.setInterval(updatePersonaSectionScroll, 80);
   };
 
   const requestStageUpdate = () => {
-    updateStage();
-  };
-
-  const requestRunSectionUpdate = () => {
-    if (runScrollState.frameId !== null) {
+    if (mobileQuery.matches) {
+      updatePersonaSectionScroll();
       return;
     }
 
-    runScrollState.frameId = window.requestAnimationFrame(updateRunSectionScroll);
+    updateStage();
+  };
+
+  const teardownRunStory = () => {
+    if (window.ScrollTrigger) {
+      window.ScrollTrigger.getAll()
+        .filter((trigger) => trigger.vars?.id === "kickd-run-story")
+        .forEach((trigger) => trigger.kill());
+    }
+
+    if (runStoryState.frameId !== null) {
+      window.cancelAnimationFrame(runStoryState.frameId);
+      runStoryState.frameId = null;
+    }
+
+    runSection?.classList.remove("run-section--story-active", "run-section--story-static");
+
+    if (featureGrid) {
+      featureGrid.style.removeProperty("height");
+    }
+
+    if (runSection) {
+      runSection.style.removeProperty("--run-mobile-track-height");
+      delete runSection.dataset.runStoryProgress;
+    }
+
+    if (runCards.length && window.gsap) {
+      window.gsap.set(runCards, {
+        clearProps: "transform,opacity,visibility,willChange,zIndex",
+      });
+    }
+  };
+
+  const syncRunStoryHeight = () => {
+    if (!runSection) {
+      return;
+    }
+
+    if (!runStoryQuery.matches || reducedMotionQuery.matches) {
+      runSection.style.removeProperty("--run-mobile-track-height");
+      return;
+    }
+
+    const viewportHeight = window.innerHeight || 0;
+    const cardHeight = featureGrid?.offsetHeight || 430;
+    const trackHeight = Math.max(viewportHeight + Math.max(300, cardHeight * 0.72), 1080);
+    runSection.style.setProperty("--run-mobile-track-height", `${Math.round(trackHeight)}px`);
+  };
+
+  const applyRunStoryProgress = (progress) => {
+    if (runCards.length !== 3 || !window.gsap) {
+      return;
+    }
+
+    const gsap = window.gsap;
+    const [cardOne, cardTwo, cardThree] = runCards;
+    const p = clamp(progress, 0, 1);
+    const blend = (value, inMin, inMax) => clamp((value - inMin) / Math.max(0.0001, inMax - inMin), 0, 1);
+
+    if (p < 0.1) {
+      gsap.set(cardOne, { y: 0, scale: 1, autoAlpha: 1, zIndex: 3 });
+      gsap.set(cardTwo, { y: 90, scale: 1, autoAlpha: 0, zIndex: 4 });
+      gsap.set(cardThree, { y: 90, scale: 1, autoAlpha: 0, zIndex: 5 });
+      return;
+    }
+
+    if (p < 0.36) {
+      const t = blend(p, 0.1, 0.36);
+      gsap.set(cardOne, { y: -20 * t, scale: 1 - 0.034 * t, autoAlpha: 1 - t, zIndex: 3 });
+      gsap.set(cardTwo, { y: 90 * (1 - t), scale: 1, autoAlpha: t, zIndex: 5 });
+      gsap.set(cardThree, { y: 90, scale: 1, autoAlpha: 0, zIndex: 4 });
+      return;
+    }
+
+    if (p < 0.48) {
+      gsap.set(cardOne, { y: -20, scale: 0.966, autoAlpha: 0, zIndex: 2 });
+      gsap.set(cardTwo, { y: 0, scale: 1, autoAlpha: 1, zIndex: 5 });
+      gsap.set(cardThree, { y: 90, scale: 1, autoAlpha: 0, zIndex: 4 });
+      return;
+    }
+
+    if (p < 0.74) {
+      const t = blend(p, 0.48, 0.74);
+      gsap.set(cardOne, { y: -20, scale: 0.966, autoAlpha: 0, zIndex: 2 });
+      gsap.set(cardTwo, { y: -20 * t, scale: 1 - 0.034 * t, autoAlpha: 1 - t, zIndex: 4 });
+      gsap.set(cardThree, { y: 90 * (1 - t), scale: 1, autoAlpha: t, zIndex: 6 });
+      return;
+    }
+
+    gsap.set(cardOne, { y: -20, scale: 0.966, autoAlpha: 0, zIndex: 2 });
+    gsap.set(cardTwo, { y: -20, scale: 0.966, autoAlpha: 0, zIndex: 3 });
+    gsap.set(cardThree, { y: 0, scale: 1, autoAlpha: 1, zIndex: 6 });
+  };
+
+  const updateRunStoryScroll = () => {
+    if (!runSection || runCards.length !== 3) {
+      runStoryState.frameId = null;
+      return;
+    }
+
+    if (!runStoryQuery.matches || reducedMotionQuery.matches) {
+      runStoryState.frameId = null;
+      return;
+    }
+
+    const scrollableDistance = Math.max(1, runSection.offsetHeight - window.innerHeight);
+    const sectionTop = runSection.getBoundingClientRect().top;
+    const progress = clamp(-sectionTop / scrollableDistance, 0, 1);
+    runSection.dataset.runStoryProgress = progress.toFixed(3);
+    applyRunStoryProgress(progress);
+    runStoryState.frameId = null;
+  };
+
+  const requestRunStoryUpdate = () => {
+    if (runStoryState.frameId !== null) {
+      return;
+    }
+
+    runStoryState.frameId = window.requestAnimationFrame(updateRunStoryScroll);
+  };
+
+  const setupRunStory = () => {
+    if (!runSection || !runWrap || !featureGrid || runCards.length !== 3) {
+      return;
+    }
+
+    runCards.forEach((card) => card.classList.add("is-visible"));
+    teardownRunStory();
+
+    if (!runStoryQuery.matches) {
+      return;
+    }
+
+    if (reducedMotionQuery.matches || !window.gsap) {
+      runSection.classList.add("run-section--story-static");
+      return;
+    }
+
+    runSection.classList.add("run-section--story-active");
+    syncRunStoryHeight();
+    applyRunStoryProgress(0);
+    updateRunStoryScroll();
   };
 
   const setupRevealAnimations = () => {
@@ -203,22 +468,43 @@
     revealTargets.forEach((element) => observer.observe(element));
   };
 
-  if (section && personaItems.length === 4) {
+  if (section && personaItems.length === 4 && personaList) {
+    syncPersonaSectionHeight();
     applyStage(calculateStage());
+    setupPersonaStory();
+    startPersonaTicker();
     requestStageUpdate();
     window.addEventListener("scroll", requestStageUpdate, { passive: true });
+    window.addEventListener("resize", syncPersonaSectionHeight);
+    window.addEventListener("resize", setupPersonaStory);
+    window.addEventListener("resize", startPersonaTicker);
     window.addEventListener("resize", requestStageUpdate);
+    mobileQuery.addEventListener("change", syncPersonaSectionHeight);
+    mobileQuery.addEventListener("change", setupPersonaStory);
+    mobileQuery.addEventListener("change", startPersonaTicker);
+    mobileQuery.addEventListener("change", requestStageUpdate);
+    reducedMotionQuery.addEventListener("change", setupPersonaStory);
+    reducedMotionQuery.addEventListener("change", startPersonaTicker);
     reducedMotionQuery.addEventListener("change", requestStageUpdate);
   }
 
+  if (introSection && impactLine && scoreRunGroup) {
+    setupSectionReveal();
+    window.addEventListener("resize", setupSectionReveal);
+    reducedMotionQuery.addEventListener("change", setupSectionReveal);
+  }
+
   if (runSection && featureGrid) {
-    syncRunSectionHeight();
-    requestRunSectionUpdate();
-    window.addEventListener("scroll", requestRunSectionUpdate, { passive: true });
-    window.addEventListener("resize", syncRunSectionHeight);
-    window.addEventListener("resize", requestRunSectionUpdate);
-    mobileQuery.addEventListener("change", syncRunSectionHeight);
-    mobileQuery.addEventListener("change", requestRunSectionUpdate);
+    setupRunStory();
+    syncRunStoryHeight();
+    window.addEventListener("scroll", requestRunStoryUpdate, { passive: true });
+    window.addEventListener("resize", setupRunStory);
+    window.addEventListener("resize", syncRunStoryHeight);
+    window.addEventListener("resize", requestRunStoryUpdate);
+    runStoryQuery.addEventListener("change", setupRunStory);
+    runStoryQuery.addEventListener("change", syncRunStoryHeight);
+    reducedMotionQuery.addEventListener("change", setupRunStory);
+    reducedMotionQuery.addEventListener("change", syncRunStoryHeight);
   }
 
   setupRevealAnimations();
